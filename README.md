@@ -28,6 +28,6 @@ Here is the script working with some example pcap:
 
 ### References:
 
-CyberChef Decoder https://gchq.github.io/CyberChef/.
-Google Translaty Python Library https://py-googletrans.readthedocs.io/en/latest/.
+- CyberChef Decoder https://gchq.github.io/CyberChef/.
+- Google Translaty Python Library https://py-googletrans.readthedocs.io/en/latest/.
 
