@@ -10,51 +10,32 @@
 
 ##########################################
 
-if [ $# -ne 2 ]; then
-    echo "Needs 2 arguments: Pcap File and Port"
-    exit 1
-fi
-
-pcap_file=$1
-port=$2
-logfile="/var/log/payload_analyzer.log"
+logfile="$(pwd)/payload_analyzer.log"
 decoded=""
 translated=""
 
-echo "############################################" >> $logfile
-echo "Date: $(date)" >> $logfile
-echo "Pcap: $pcap_file" >> $logfile
-echo "Port: $port" >> $logfile
-
+# Hexadecimal decoder function using CyberChef 
 function decoder {
     hex_data=$1
-    #echo "Decoding $hex_data . . ."
+    echo "Decoding $hex_data . . ."
     decoded_hex=$(echo "$hex_data" | node cyberchef-decode.js)
-    #echo "Decoded hex: $decoded_hex"
     decoded=$decoded_hex
-    #echo "Translating $decoded_hex... "
     translated_hex=$(python3 googletranslator.py "$decoded_hex")
-    #echo $translated_hex
     translated=$translated_hex
 
     return 0
 }
 
+# Parser function to achieve a clean write to logfile
 function parser {
     arr=("$@")
-    #echo "Parsing: $arr"
     flows=$(echo $arr | cut -d" " -f1)
     size=$(echo $arr | cut -d" " -f2 | cut -d"," -f1)
     payload=$(echo $arr | cut -d" " -f2 | cut -d"," -f2)
-    #echo "flows $flows"
-    #echo "size $size"
-    #echo "size2 ${#size}"
-    #echo "payload $payload"
         tcpflowobj+="$flows"
     if [ ${#size} -gt 0 ]; then
         decoder $payload    
     else
-        #echo "NO PAYLOAD"
         size=0
         payload="No Payload"
         decoded="No Payload"
@@ -71,24 +52,120 @@ function parser {
     return 0
 }
 
+# Hexadecimal decode option
+function hexa_decode_option {
+    decoder $1
+    echo "Decoded $1:"
+    echo $decoded
+    echo "Translating . . ."
+    echo $translated
+    return 0
+}
 
-echo "Reading pcap $pcap_file. . ."
-echo "Filtering port $port. . ."
-results=($(tshark -r $pcap_file -T fields -E separator=, -e data.len -e data tcp.srcport==$port | sort -n | uniq -c))
-#results=("${results[@]:1}")
-aux=("${results[@]}")
+# Pcap option will read the pcap and obtain the minimun parameters using Tshark
+function pcap_decode_option {
+    pcap_file=$(realpath $1)
+    echo ".-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-." >> $logfile
+    echo "Date: $(date)" >> $logfile
+    echo "Pcap: $pcap_file" >> $logfile
+    echo "Port: All ports" >> $logfile
+    
+    echo "Reading pcap $pcap_file . . . " 
+    echo "Without port filter (this may take a while) . . ."
+    results=($(tshark -r $pcap_file -T fields -E separator=, -e data.len -e data | sort -n | uniq -c))
+    aux=("${results[@]}")
 
-s=0
+    s=0
 
-len=${#aux[@]}
-i=0
+    len=${#aux[@]}
+    i=0
 
-while [ $i -lt $len ] ; do
-    tcpflow="${results[@]:$s:2}"
-    #echo "${tcpflow[@]}"
-    parser "${tcpflow[@]}"
-    s=$((s+2))
-    i=$((i+2))
-done
+    while [ $i -lt $len ] ; do
+        tcpflow="${results[@]:$s:2}"
+        parser "${tcpflow[@]}"
+        s=$((s+2))
+        i=$((i+2))
+    done
+    
+    echo ".-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-END-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-." >> $logfile
+
+    echo "Done"
+    echo  "See results at payload_analyzer.log"
+    
+    return 0
+}
+
+# Pcap and Port filtering option will read the pcap and obtain the minimun parameters filtering by port using Tshark
+function port_decode_option {
+    pcap_file=$(realpath $1)
+    port=$2
+    echo ".-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-." >> $logfile
+    echo "Date: $(date)" >> $logfile
+    echo "Pcap: $pcap_file" >> $logfile
+    echo "Port: $port" >> $logfile
+    
+    echo "Reading pcap $pcap_file . . ."
+    echo "Filtering port $port . . ."
+    results=($(tshark -r $pcap_file -T fields -E separator=, -e data.len -e data tcp.srcport==$port | sort -n | uniq -c))
+    aux=("${results[@]}")
+
+    s=0
+
+    len=${#aux[@]}
+    i=0
+
+    while [ $i -lt $len ] ; do
+        tcpflow="${results[@]:$s:2}"
+        parser "${tcpflow[@]}"
+        s=$((s+2))
+        i=$((i+2))
+    done
+
+    echo ".-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-END-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-." >> $logfile
+
+    echo "Done"
+    echo "See results at payload_analyzer.log"
+    
+    return 0
+}
+
+# Usage and Help section
+usage="- Hexadecimal decoder and translator for network analysis. \nusage: $(basename "$0") [-h] [-d hexacode] [-p pcap] [-pp pcap port] 
+
+\nwhere:
+    \n\t  -h - show this help text
+    \n\t  -d  hexacode - to decode and translate given hexadecimal code and prints the results in standard output
+    \n\t  -p pcap - to decode and translate all TCP data in given pcap file and writes the results in logfile payload_analyzer.log 
+    \n\t  -t pcap port - to decode and translate all TCP data in given pcap file filtering by giving port and writes the results in logfile payload_analyzer.log
+    \n\t  -c - clean all results in logfile payload_analyzer.log"
+
+if [ $# -lt 1 ]; then
+    echo -e $usage
+    exit 1  
+fi
+
+option=$1
+case "$option" in
+    -h) 
+        echo -e "$usage"
+        ;;
+    -d) 
+        hexa_decode_option $2
+        ;;
+    -p) 
+        pcap_decode_option $2
+        ;;
+    -t) 
+        port_decode_option $2 $3
+        ;;   
+    -c) 
+        echo "Cleaning logfile."
+        echo "" > $logfile
+        ;;   
+    *) 
+        echo "illegal option: \n"
+        echo -e "$usage"
+        ;;
+esac
 
 exit 0
