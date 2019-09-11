@@ -20,7 +20,6 @@ The workflow of the tool is the following:
 - Hexadecimal decoder and translator for network analysis. 
 usage: payload_analyzer.sh [-h] [-d hexacode] [-p pcap] [-pp pcap port] 
 where:
-
          - h - show this help text 
          - d hexacode - to decode and translate given hexadecimal code and prints the results in standard output 
          - p pcap - to decode and translate all TCP data in given pcap file and writes the results in logfile payload_analyzer.log 
