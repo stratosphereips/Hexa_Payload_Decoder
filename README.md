@@ -21,12 +21,12 @@ The workflow of the tool is the following:
 - Hexadecimal decoder and translator for network analysis. 
 usage: payload_analyzer.sh [-h] [-d hexacode] [-p pcap] [-pp pcap port] 
 where:
-	 - h - show this help text 
-	 - d hexacode - to decode and translate given hexadecimal code and print the results in standard output 
-	 - p pcap - to decode and translate all TCP data in given pcap file and write the results in logfile payload_analyzer.log 
-	 - t pcap port - to decode and translate all TCP data in given pcap file filtering by giving port and write the results in logfile payload_analyzer.log 
-	 - l pcap port datalength - to decode and translate all TCP data in given pcap file filtering by giving port and data length and writes the results in logfile payload_analyzer.log 
-	 - c - clean all results in logfile payload_analyzer.log
+	 - -h - show this help text 
+	 - -d hexacode - to decode and translate given hexadecimal code and print the results in standard output 
+	 - -p pcap - to decode and translate all TCP data in given pcap file and write the results in logfile payload_analyzer.log 
+	 - -t pcap port - to decode and translate all TCP data in given pcap file filtering by giving port and write the results in logfile payload_analyzer.log 
+	 - -l pcap port datalength - to decode and translate all TCP data in given pcap file filtering by giving port and data length and writes the results in logfile payload_analyzer.log 
+	 - -c - clean all results in logfile payload_analyzer.log
 
 
 ---
