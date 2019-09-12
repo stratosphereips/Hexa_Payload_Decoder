@@ -129,6 +129,44 @@ function port_decode_option {
     return 0
 }
 
+# Pcap, port and data length filtering option will read the pcap and obtain the minimun parameters filtering by port using Tshark
+function datalen_decode_option {
+    pcap_file=$(realpath $1)
+    port=$2
+    datalen=$3
+    echo ".-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-." >> $logfile
+    echo "Date: $(date)" >> $logfile
+    echo "Pcap: $pcap_file" >> $logfile
+    echo "Port: $port" >> $logfile
+    echo "Data Len: $datalen" >> $logfile
+    
+    echo "Reading pcap $pcap_file . . ."
+    echo "Filtering port $port . . ."
+    echo "Filtering data length $datalen . . ."
+    results=($(tshark -r $pcap_file -T fields -E separator=, -e data.len -e data "(data.len>$datalen)&&(tcp.srcport==$port)" | sort -n | uniq -c))
+    aux=("${results[@]}")
+
+    s=0
+
+    len=${#aux[@]}
+    i=0
+
+    while [ $i -lt $len ] ; do
+        tcpflow="${results[@]:$s:2}"
+        parser "${tcpflow[@]}"
+        s=$((s+2))
+        i=$((i+2))
+    done
+
+    echo ".-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-END-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-." >> $logfile
+
+    echo "Done"
+    echo "See results at payload_analyzer.log"
+    
+    return 0
+}
+
+
 # Usage and Help section
 usage="- Hexadecimal decoder and translator for network analysis. \nusage: $(basename "$0") [-h] [-d hexacode] [-p pcap] [-pp pcap port] 
 
@@ -137,6 +175,7 @@ usage="- Hexadecimal decoder and translator for network analysis. \nusage: $(bas
     \n\t  -d  hexacode - to decode and translate given hexadecimal code and prints the results in standard output
     \n\t  -p pcap - to decode and translate all TCP data in given pcap file and writes the results in logfile payload_analyzer.log 
     \n\t  -t pcap port - to decode and translate all TCP data in given pcap file filtering by giving port and writes the results in logfile payload_analyzer.log
+    \n\t  -l pcap port datalength - to decode and translate all TCP data in given pcap file filtering by giving port and data length and writes the results in logfile payload_analyzer.log
     \n\t  -c - clean all results in logfile payload_analyzer.log"
 
 if [ $# -lt 1 ]; then
@@ -157,7 +196,10 @@ case "$option" in
         ;;
     -t) 
         port_decode_option $2 $3
-        ;;   
+        ;;
+    -l) 
+        datalen_decode_option $2 $3 $4
+        ;;    
     -c) 
         echo "Cleaning logfile."
         echo "" > $logfile
