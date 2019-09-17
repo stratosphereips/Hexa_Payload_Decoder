@@ -20,6 +20,7 @@ function decoder {
     echo "Decoding $hex_data . . ."
     decoded_hex=$(echo "$hex_data" | node cyberchef-decode.js)
     decoded=$decoded_hex
+    echo "Decoded hex data: $decoded_hex"
     translated_hex=$(python3 googletranslator.py "$decoded_hex")
     translated=$translated_hex
 

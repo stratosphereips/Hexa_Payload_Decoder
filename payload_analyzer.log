@@ -1,0 +1,19 @@
+
+.-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.
+Date: mar sep 17 12:23:42 -03 2019
+Pcap: /home/agus/Documentos/postgrado/stratosphere-ips/captures/iot-pcaps/CTU-IoT-Malware-Capture-52-1/pcap/splited_pcap0.pcap
+Port: 4441
+Data Len: 4
+-------------------------------------------
+Number of Equal Payload Flows: 1
+Size of Payload: 9
+Hexa Coded Payload: fffb01fffb03fffc22
+Decoded Payload: ÿûÿûÿü"
+Translated Payload: Yu Yu Yu "
+-------------------------------------------
+Number of Equal Payload Flows: 1
+Size of Payload: 44
+Hexa Coded Payload: 1b5b313b33346dd0bfd0bed0bbd18cd0b7d0bed0b2d0b0d182d0b5d0bbd18c1b5b313b33336d3a201b5b306d
+Decoded Payload: [1;34mпользователь[1;33m: [0m
+Translated Payload: user:
+.-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-END-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.
