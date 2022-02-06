@@ -50,27 +50,3 @@ def translate_data(data):
                     return None 
     except Exception as e:
         return None
-
-
-data = sys.argv[1]
-# print(data)
-
-try:
-    decoded_data = bytes.fromhex(data).decode('utf-8')
-    escaped_data = escape_ansi(decoded_data)
-
-    languages = translator.detect(escaped_data)
-
-    # We are only looking at the first detected language
-    if languages[0]["confidence"] > 0.2:
-        text = translator.translate(escaped_data, languages[0]["language"], 'en')
-        print(text)
-    else:
-        for lang in ['en', 'ru', 'cn', 'es']:
-            try:
-                text = translator.translate(escaped_data, lang, 'en')
-                print(text)
-            except:
-                pass 
-except Exception as e: # UnicodeDecodeError may happen
-    pass
