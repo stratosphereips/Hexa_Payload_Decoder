@@ -2,6 +2,7 @@ import subprocess
 import argparse
 from libretranslator import decode_data, translate_data
 from datetime import datetime
+import logging 
 
 LOG_FILE = 'payload_analyzer.log'
 
@@ -10,22 +11,25 @@ def parse_output(results):
 
         if len(res) == 0:
             continue
-        print("-------------------------------------------")
+        logging.info("-------------------------------------------")
+        
         data = res.lstrip().split(b' ')
-        print("Number of similar payload flows:", int(data[0]))
+        logging.info(f"Number of similar payload flows: {int(data[0])}")
 
         data_len, hexa_payload = data[1].split(b',')
-        print("Size of payload:", int(data_len))
-        print("Hexa payload:", hexa_payload)
+        logging.info(f"Size of payload: {int(data_len)}")
+        logging.info(f"Hexa payload: {hexa_payload}")
         decoded_data = decode_data(hexa_payload.decode('utf-8'))
 
         if decoded_data is not None:
-            print("Decoded payload:", decoded_data)
+            logging.info(f"Decoded payload: {decoded_data}")
             trans_data = translate_data(decoded_data)
-            print("Translated payload:", trans_data)
+            logging.info(f"Translated payload: {trans_data}")
 
 
 if __name__ == '__main__':
+
+    logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s :: %(message)s')
 
     prog = " Hexadecimal decoder and translator for network analysis."
     parser = argparse.ArgumentParser(prog=prog)
@@ -50,32 +54,35 @@ if __name__ == '__main__':
 
     if args.read is not None:
         pcap_file = args.read
-        print(".-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.")
-        print("Date", datetime.now())
-        print("Pcap file:", pcap_file)
+        logging.info(".-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.")
+        # print("Date", datetime.now())
+        # print("Pcap file:", pcap_file)
+        logging.info(f"Starting analysis of {pcap_file}")
     else:
-        print("You need to specify a pcap file to analyze!")
+        print("You need to specify a pcap file to analyze. Exiting...")
         exit()
 
     if args.port is not None:
         port_num = args.port
-        print("Port:", port_num)
+        # print("Port:", port_num)
+        logging.info(f"Port number: {port_num}")
         if args.length is not None:
-            print("Minimum payload length:", args.length)
+            # print("Minimum payload length:", args.length)
+            logging.info(f"Minimum payload lengthr: {args.length}")
             results = subprocess.check_output(f'tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data "(data.len>{args.length})&&(tcp.srcport=={port_num})" | sort -n | uniq -c', shell=True)
         else:
             results = subprocess.check_output(f"tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data '(tcp.srcport=={port_num})' | sort -n | uniq -c", shell=True)
     else:
         if args.length is not None:
-            print("Minimum payload length:", args.length)
+            logging.info(f"Minimum payload lengthr: {args.length}")
             results = subprocess.check_output(f"tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data '(data.len>{args.length})' | sort -n | uniq -c", shell=True)
-            # print(results)
         else:
             results = subprocess.check_output(f"tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data | sort -n | uniq -c", shell=True)
 
     if len(results) > 0:
         parse_output(results)
     else:
-        print("No results with these parameters")
+        logging.warning("No results with these parameters")
 
-    print(".-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-END-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.")
+    logging.info(f"Finished analysis of file: {pcap_file}")
+    logging.info(".-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.")
