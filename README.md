@@ -12,14 +12,14 @@ The idea is to develop a tool aimed to extract the TCP hexadecimal data from net
 The workflow of the tool is the following:
   - User runs the bash script with two parameters, the pcap file to analyze and some port.
   - The bash script extracts the hexadecimal data from the TCP flows filtering by the user provided port using Tshark command.
-  - The extracted hexadecimal data is passed to CyberChef decoder which uses multiple decoding techniques to get the raw data in the language it had been written.
-  - The decoded data is finally passed to Google Translate python library which automatically detects the language and translate it to english.
+  - The extracted hexadecimal data are decoded as UTF-8 using the python standard library.
+  - The decoded data is finally passed to Libre Translate python library which automatically detects the language and translates it to english.
   - The decoded and translated data is written to an output file to see the results.
   - This flow repeats for every TCP flow found in the pcap.
   
 #### Help:
 - Hexadecimal decoder and translator for network analysis. 
-usage: payload_analyzer.sh [-h] [-d hexacode] [-p pcap] [-pp pcap port] 
+usage: payload_analyzer.sh [-h] [-d hexacode] [-p pcap] [-t pcap port] [-l pcap port datalength] 
 where:
 	 - -h - show this help text 
 	 - -d hexacode - to decode and translate given hexadecimal code and print the results in standard output 
@@ -37,8 +37,8 @@ Here is the script working with some example pcap:
 
 ---
 
-### References:
+### Requirements:
 
-- CyberChef Decoder https://gchq.github.io/CyberChef/.
-- Google Translaty Python Library https://py-googletrans.readthedocs.io/en/latest/.
+- Libre Translaty Python Library https://github.com/argosopentech/LibreTranslate-py
+- Tshark https://www.wireshark.org/docs/man-pages/tshark.html
 
