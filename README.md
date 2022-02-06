@@ -1,7 +1,14 @@
+<p align="left">
+     <img src="https://i.imgur.com/hbsbZnt.png" width="80" />
+</p>
+
 
 # Hexa Payload Decoder 
 
-![Arcane|Transmutation](https://i.imgur.com/hbsbZnt.png)
+[![Docker Image CI](https://github.com/stratosphereips/Hexa_Payload_Decoder/actions/workflows/docker-image.yml/badge.svg)](https://github.com/stratosphereips/Hexa_Payload_Decoder/actions/workflows/docker-image.yml)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/stratosphereips/Hexa_Payload_Decoder/master)
+![Docker Pulls](https://img.shields.io/docker/pulls/stratosphereips/hexapayloaddecoder?color=green)
+
 
 ### Problem Statement
 When analyzing malware traffic on the network sometimes we find ourselves spending several minutes decoding the data from the hexadecimal streams. In the best case scenario we can use some tools (like Wireshark) to see this hexadecimal streams already decoded, but sometimes the decoded characters are not supported by most of the networking analyzers.
