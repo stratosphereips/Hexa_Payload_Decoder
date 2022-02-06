@@ -2,7 +2,7 @@ import subprocess
 import argparse
 from libretranslator import decode_data, translate_data
 from datetime import datetime
-import logging 
+import logging
 
 LOG_FILE = 'payload_analyzer.log'
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     group1 = parser.add_mutually_exclusive_group()
     group1.add_argument("-d", "--decode", required=False, type=str, help="Decode and translate the given string.")
     group1.add_argument("-c", "--clean", required=False, action='store_true', help="Clean the contents of the log file.")
-    
+
     group2 = parser.add_argument_group("Analysis")
     group2.add_argument("-r", "--read", type=str, required=False, help="Name of the pcap file that is analyzed.")
     group2.add_argument("-p", "--port", type=int, required=False, help="Analyze traffic for a specific port only.")
@@ -74,7 +74,7 @@ if __name__ == '__main__':
         results = subprocess.check_output(f'tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data "(data.len>{max_len})&&(tcp.srcport=={port_num})" | sort -n | uniq -c', shell=True)
     else:
         results = subprocess.check_output(f"tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data '(data.len>{max_len})' | sort -n | uniq -c", shell=True)
-        
+
     if len(results) > 0:
         parse_output(results)
     else:
