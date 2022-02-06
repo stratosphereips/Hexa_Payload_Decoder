@@ -33,7 +33,7 @@ where:
 
 Here is the script working with some example pcap:
 
-![Suspicious_payload_example](https://i.imgur.com/fZ8zeSg.png)
+![Suspicious_payload_example](images/hexa_decode.png)
 
 ---
 
