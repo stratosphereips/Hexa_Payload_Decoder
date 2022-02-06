@@ -11,10 +11,14 @@ def parse_output(results):
 
         if len(res) == 0:
             continue
+
         logging.info("-------------------------------------------")
-        
         data = res.lstrip().split(b' ')
-        logging.info(f"Number of similar payload flows: {int(data[0])}")
+
+        if len(data[0]) > 0:
+            logging.info(f"Number of similar payload flows: {int(data[0])}")
+        else:
+            continue
 
         data_len, hexa_payload = data[1].split(b',')
         logging.info(f"Size of payload: {int(data_len)}")
@@ -40,9 +44,11 @@ if __name__ == '__main__':
     group2 = parser.add_argument_group("Analysis")
     group2.add_argument("-r", "--read", type=str, required=False, help="Name of the pcap file that is analyzed.")
     group2.add_argument("-p", "--port", type=int, required=False, help="Analyze traffic for a specific port only.")
-    group2.add_argument("-l", "--length", type=int, required=False, help="Analyze data streams longer than the given length.")
+    group2.add_argument("-l", "--length", type=int, required=False, default=2, help="Analyze data streams longer than the given length.")
 
     args = parser.parse_args()
+
+    max_len = args.length
 
     if args.decode is not None:
         print(decode_data(args.decode))
@@ -55,30 +61,20 @@ if __name__ == '__main__':
     if args.read is not None:
         pcap_file = args.read
         logging.info(".-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-.")
-        # print("Date", datetime.now())
-        # print("Pcap file:", pcap_file)
         logging.info(f"Starting analysis of {pcap_file}")
     else:
         print("You need to specify a pcap file to analyze. Exiting...")
         exit()
 
+    logging.info(f"Minimum payload length: {args.length}")
+
     if args.port is not None:
         port_num = args.port
-        # print("Port:", port_num)
         logging.info(f"Port number: {port_num}")
-        if args.length is not None:
-            # print("Minimum payload length:", args.length)
-            logging.info(f"Minimum payload lengthr: {args.length}")
-            results = subprocess.check_output(f'tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data "(data.len>{args.length})&&(tcp.srcport=={port_num})" | sort -n | uniq -c', shell=True)
-        else:
-            results = subprocess.check_output(f"tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data '(tcp.srcport=={port_num})' | sort -n | uniq -c", shell=True)
+        results = subprocess.check_output(f'tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data "(data.len>{max_len})&&(tcp.srcport=={port_num})" | sort -n | uniq -c', shell=True)
     else:
-        if args.length is not None:
-            logging.info(f"Minimum payload lengthr: {args.length}")
-            results = subprocess.check_output(f"tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data '(data.len>{args.length})' | sort -n | uniq -c", shell=True)
-        else:
-            results = subprocess.check_output(f"tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data | sort -n | uniq -c", shell=True)
-
+        results = subprocess.check_output(f"tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data '(data.len>{max_len})' | sort -n | uniq -c", shell=True)
+        
     if len(results) > 0:
         parse_output(results)
     else:
