@@ -1,0 +1,8 @@
+FROM python:3.9-slim
+
+ENV DESTINATION_DIR /hexpayloaddecoder
+
+COPY . ${DESTINATION_DIR}/
+
+WORKDIR ${DESTINATION_DIR}
+
