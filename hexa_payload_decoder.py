@@ -2,34 +2,31 @@ import subprocess
 import argparse
 from libretranslator import decode_data, translate_data
 from datetime import datetime
-import logging 
+import logging
+import json
 
 LOG_FILE = 'payload_analyzer.log'
 
-def parse_output(results):
-    for res in list(results.split(b'\n')):
 
-        if len(res) == 0:
-            continue
+def parse_json(results):
+    # Create a set that holds the unique payloads
+    hexa_set = set()
+    for res in results:
+        hexa_payload = res["_source"]["layers"]["data"][0]
 
-        logging.info("-------------------------------------------")
-        data = res.lstrip().split(b' ')
-
-        if len(data[0]) > 0:
-            logging.info(f"Number of similar payload flows: {int(data[0])}")
+        # Do not attempt to translate something that is already been attempted
+        if hexa_payload in hexa_set:
+            continue 
         else:
-            continue
+            hexa_set.add(hexa_payload)
 
-        data_len, hexa_payload = data[1].split(b',')
-        logging.info(f"Size of payload: {int(data_len)}")
-        logging.info(f"Hexa payload: {hexa_payload}")
-        decoded_data = decode_data(hexa_payload.decode('utf-8'))
-
+        decoded_data = decode_data(hexa_payload)
         if decoded_data is not None:
+            # Log inforamtion only about strings that can be decoded to reduce the log file 
+            logging.info(f"Hexa payload: {hexa_payload}, size: {res['_source']['layers']['data.len'][0]}")
             logging.info(f"Decoded payload: {decoded_data}")
             trans_data = translate_data(decoded_data)
             logging.info(f"Translated payload: {trans_data}")
-
 
 if __name__ == '__main__':
 
@@ -71,12 +68,13 @@ if __name__ == '__main__':
     if args.port is not None:
         port_num = args.port
         logging.info(f"Port number: {port_num}")
-        results = subprocess.check_output(f'tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data "(data.len>{max_len})&&(tcp.srcport=={port_num})" | sort -n | uniq -c', shell=True)
+        results = subprocess.check_output(f"tshark -r {pcap_file} -T fields -T json -E separator=, -e data.len -e data '(data.len>{max_len})&&(tcp.srcport=={port_num})'", shell=True)
     else:
-        results = subprocess.check_output(f"tshark -r {pcap_file} -T fields -E separator=, -e data.len -e data '(data.len>{max_len})' | sort -n | uniq -c", shell=True)
+        results = subprocess.check_output(f"tshark -r {pcap_file} -T fields -T json -E separator=, -e data.len -e data '(data.len>{max_len})'", shell=True)
         
     if len(results) > 0:
-        parse_output(results)
+        res_json = json.loads(results.lstrip())
+        parse_json(res_json)
     else:
         logging.warning("No results with these parameters")
 
