@@ -1,24 +1,33 @@
+<p align="left">
+     <img src="https://i.imgur.com/hbsbZnt.png" width="80" />
+</p>
+
 
 # Hexa Payload Decoder 
 
-![Arcane|Transmutation](https://i.imgur.com/hbsbZnt.png)
+[![Docker Image CI](https://github.com/stratosphereips/Hexa_Payload_Decoder/actions/workflows/docker-image.yml/badge.svg)](https://github.com/stratosphereips/Hexa_Payload_Decoder/actions/workflows/docker-image.yml)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/stratosphereips/Hexa_Payload_Decoder/master)
+![Docker Pulls](https://img.shields.io/docker/pulls/stratosphereips/hexapayloaddecoder?color=green)
 
-### Problem Statement
-When analyzing malware traffic on the network sometimes we find ourselves spending several minutes decoding the data from the hexadecimal streams. In the best case scenario we can use some tools (like Wireshark) to see this hexadecimal streams already decoded, but sometimes the decoded characters are not supported by most of the networking analyzers.
 
-### The Solution
+## Problem Statement
+When analyzing malware traffic on the network sometimes we find ourselves spending several minutes decoding the data from the hexadecimal streams. In the best case scenario we can use some tools (like Wireshark) to see these  streams already decoded, but sometimes the decoded characters are not supported by most of the networking analyzers.
+
+## The Solution
 The idea is to develop a tool aimed to extract the TCP hexadecimal data from netwrok captures filtering by a specific port provided by the user, decode it from hexadecimal and translate it from any language to english.
 
 The workflow of the tool is the following:
   - User runs the bash script with two parameters, the pcap file to analyze and some port.
   - The bash script extracts the hexadecimal data from the TCP flows filtering by the user provided port using Tshark command.
-  - The extracted hexadecimal data are decoded as UTF-8 using the python standard library.
-  - The decoded data is finally passed to Libre Translate python library which automatically detects the language and translates it to english.
+  - The extracted hexadecimal data are decoded as UTF-8 using the Python standard library.
+  - The decoded data is finally passed to Libre Translate Python library which automatically detects the language and translates it to English.
   - The decoded and translated data is written to an output file to see the results.
   - This flow repeats for every TCP flow found in the pcap.
   
-#### Help:
-- Hexadecimal decoder and translator for network analysis. 
+## Hexadecimal decoder and translator for network analysis
+
+The hexadecimal decoder and translator for network analysis runs using Python 3, and currently supports the following options:
+
 ```
 usage:  python3 hexa_payload_decoder.py [-h] [-d DECODE | -c] [-r READ] [-p PORT] [-l LENGTH]
 
@@ -38,14 +47,21 @@ Analysis:
 
 ---
 
-Here is the script working with some example pcap:
+Here is the tool working with a packet capture from Mirai IoT malware:
 
 ![Suspicious_payload_example](images/hexa_decode.png)
 
 ---
 
-### Requirements:
+## Requirements
 
 - Libre Translate Python Library https://github.com/argosopentech/LibreTranslate-py
 - Tshark https://www.wireshark.org/docs/man-pages/tshark.html
 
+## Docker Image
+
+The Hexa Payload Decoder currently has a public docker image:
+
+```
+docker run --rm -it stratosphereips/hexapayloaddecoder:latest /bin/bash
+```

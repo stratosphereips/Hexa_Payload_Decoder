@@ -31,7 +31,7 @@ def decode_data(data):
         decoded_data = bytes.fromhex(data).decode('utf-8')
         return decoded_data
     except:
-        return None 
+        return None
 
 def translate_data(data):
     try:
@@ -47,6 +47,6 @@ def translate_data(data):
                     text = translator.translate(escaped_data, lang, 'en')
                     return text
                 except:
-                    return None 
+                    return None
     except Exception as e:
         return None
