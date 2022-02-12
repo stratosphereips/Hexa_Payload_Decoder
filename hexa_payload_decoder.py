@@ -27,6 +27,8 @@ def parse_json(results):
             logging.info(f"Decoded payload: {decoded_data}")
             trans_data = translate_data(decoded_data)
             logging.info(f"Translated payload: {trans_data}")
+        else:
+            logging.debug(f"Hexa payload: {hexa_payload}, size: {res['_source']['layers']['data.len'][0]}")
 
 if __name__ == '__main__':
 
