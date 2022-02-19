@@ -5,10 +5,6 @@ from datetime import datetime
 import logging
 import json
 
-
-LOG_FILE = 'payload_analyzer.log'
-
-
 def parse_json(results):
     # Create a set that holds the unique payloads
     hexa_set = set()
@@ -17,13 +13,13 @@ def parse_json(results):
 
         # Do not attempt to translate something that is already been attempted
         if hexa_payload in hexa_set:
-            continue 
+            continue
         else:
             hexa_set.add(hexa_payload)
 
         decoded_data = decode_data(hexa_payload)
         if decoded_data is not None:
-            # Log inforamtion only about strings that can be decoded to reduce the log file 
+            # Log inforamtion only about strings that can be decoded to reduce the log file
             logging.info(f"Hexa payload: {hexa_payload}, size: {res['_source']['layers']['data.len'][0]}")
             logging.info(f"Decoded payload: {decoded_data}")
             trans_data = translate_data(decoded_data)
@@ -32,8 +28,6 @@ def parse_json(results):
             logging.debug(f"Hexa payload: {hexa_payload}, size: {res['_source']['layers']['data.len'][0]}")
 
 if __name__ == '__main__':
-
-    logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s :: %(message)s')
 
     prog = " Hexadecimal decoder and translator for network analysis."
     parser = argparse.ArgumentParser(prog=prog)
@@ -45,17 +39,20 @@ if __name__ == '__main__':
     group2.add_argument("-r", "--read", type=str, required=False, help="Name of the pcap file that is analyzed.")
     group2.add_argument("-p", "--port", type=int, required=False, help="Analyze traffic for a specific port only.")
     group2.add_argument("-l", "--length", type=int, required=False, default=2, help="Analyze data streams longer than the given length.")
+    group2.add_argument("-w", "--write", type=str, required=False, default='payload_analyzer.log', help="Store output in log file. Default payload_analyzer.log")
 
     args = parser.parse_args()
 
     max_len = args.length
+
+    logging.basicConfig(filename=args.write, level=logging.INFO, format='%(asctime)s :: %(message)s')
 
     if args.decode is not None:
         print(decode_data(args.decode))
         exit()
 
     if args.clean:
-        open(LOG_FILE, 'w').close()
+        open(args.write, 'w').close()
         exit()
 
     if args.read is not None:
