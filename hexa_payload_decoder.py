@@ -5,10 +5,6 @@ from datetime import datetime
 import logging
 import json
 
-
-LOG_FILE = 'payload_analyzer.log'
-
-
 def parse_json(results):
     # Create a set that holds the unique payloads
     hexa_set = set()
@@ -33,8 +29,6 @@ def parse_json(results):
 
 if __name__ == '__main__':
 
-    logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s :: %(message)s')
-
     prog = " Hexadecimal decoder and translator for network analysis."
     parser = argparse.ArgumentParser(prog=prog)
     group1 = parser.add_mutually_exclusive_group()
@@ -45,17 +39,20 @@ if __name__ == '__main__':
     group2.add_argument("-r", "--read", type=str, required=False, help="Name of the pcap file that is analyzed.")
     group2.add_argument("-p", "--port", type=int, required=False, help="Analyze traffic for a specific port only.")
     group2.add_argument("-l", "--length", type=int, required=False, default=2, help="Analyze data streams longer than the given length.")
+    group2.add_argument("-w", "--write", type=str, required=False, default='payload_analyzer.log', help="Store output in log file. Default payload_analyzer.log")
 
     args = parser.parse_args()
 
     max_len = args.length
+
+    logging.basicConfig(filename=args.write, level=logging.INFO, format='%(asctime)s :: %(message)s')
 
     if args.decode is not None:
         print(decode_data(args.decode))
         exit()
 
     if args.clean:
-        open(LOG_FILE, 'w').close()
+        open(args.write, 'w').close()
         exit()
 
     if args.read is not None:
