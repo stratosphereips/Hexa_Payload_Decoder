@@ -17,13 +17,13 @@ def parse_json(results):
 
         # Do not attempt to translate something that is already been attempted
         if hexa_payload in hexa_set:
-            continue 
+            continue
         else:
             hexa_set.add(hexa_payload)
 
         decoded_data = decode_data(hexa_payload)
         if decoded_data is not None:
-            # Log inforamtion only about strings that can be decoded to reduce the log file 
+            # Log inforamtion only about strings that can be decoded to reduce the log file
             logging.info(f"Hexa payload: {hexa_payload}, size: {res['_source']['layers']['data.len'][0]}")
             logging.info(f"Decoded payload: {decoded_data}")
             trans_data = translate_data(decoded_data)
